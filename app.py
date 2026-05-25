@@ -87,7 +87,8 @@ elif menu == '🔍 Analisis Korelasi':
     with col1:
         st.subheader('Stress Level vs Kualitas Tidur')
         fig, ax = plt.subplots()
-        sns.boxplot(data=df, x='Stress Level', y='Quality of Sleep', palette='Reds', ax=ax)
+        sns.boxplot(data=df, x='Stress Level', y='Quality of Sleep', 
+                    palette='Reds', ax=ax)
         st.pyplot(fig)
 
     with col2:
