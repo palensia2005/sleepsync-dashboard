@@ -4,4 +4,6 @@ matplotlib
 seaborn
 gdown
 joblib
-tensorflow
+scikit-learn
+numpy
+tensorflow-cpu
