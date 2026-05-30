@@ -36,6 +36,7 @@ menu = st.sidebar.radio('Pilih Halaman:', [
     '📊 Distribusi Data',
     '🔍 Analisis Korelasi',
     '💡 Insight',
+    '📈 A/B Testing',
     '🔮 Prediksi'
 ])
 
@@ -114,6 +115,49 @@ elif menu == '💡 Insight':
     st.info('**Stress Level & Kualitas Tidur**\n\nSemakin tinggi tingkat stres, semakin rendah kualitas tidur.')
     st.info('**Durasi Tidur & Kualitas Tidur**\n\nDurasi tidur 7-8 jam berkorelasi dengan kualitas tidur terbaik.')
     st.info('**Gangguan Tidur**\n\nPenderita Insomnia memiliki tingkat aktivitas fisik paling rendah.')
+
+# ============================================================
+# HALAMAN A/B Testing
+# ============================================================
+elif menu == '📈 A/B Testing':
+    st.title('📈 A/B Testing')
+    st.write('Simulasi uji efektivitas program relaksasi terhadap kualitas tidur')
+
+    import numpy as np
+    from scipy import stats
+
+    np.random.seed(42)
+    df_ab = df[['Quality of Sleep', 'Stress Level']].copy()
+    df_ab['Grup'] = np.random.choice(['A (Kontrol)', 'B (Treatment)'], size=len(df_ab), p=[0.5, 0.5])
+    df_ab.loc[df_ab['Grup'] == 'B (Treatment)', 'Quality of Sleep'] += 0.7
+    df_ab['Quality of Sleep'] = df_ab['Quality of Sleep'].clip(4, 9)
+
+    group_a = df_ab[df_ab['Grup'] == 'A (Kontrol)']['Quality of Sleep']
+    group_b = df_ab[df_ab['Grup'] == 'B (Treatment)']['Quality of Sleep']
+    t_stat, p_value = stats.ttest_ind(group_a, group_b, equal_var=False)
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric('Rata-rata Grup A', f'{group_a.mean():.3f}')
+    col2.metric('Rata-rata Grup B', f'{group_b.mean():.3f}')
+    col3.metric('P-Value', f'{p_value:.4f}')
+
+    st.subheader('Hasil Uji Statistik')
+    hasil = {
+        'Metrik': ['Quality of Sleep'],
+        'Mean Grup A': [round(group_a.mean(), 3)],
+        'Mean Grup B': [round(group_b.mean(), 3)],
+        'Selisih': [round(group_b.mean() - group_a.mean(), 3)],
+        'P-Value': [round(p_value, 4)],
+        'Signifikan': ['✅ Ya' if p_value < 0.05 else '❌ Tidak']
+    }
+    st.dataframe(pd.DataFrame(hasil))
+
+    if p_value < 0.05:
+        st.success('✅ Program relaksasi terbukti secara statistik meningkatkan kualitas tidur pengguna!')
+    else:
+        st.warning('❌ Tidak ada perbedaan signifikan antara kedua grup')
+
+    st.info('ℹ️ Untuk implementasi nyata diperlukan minimal 350 pengguna (175 per grup)')
 
 # ============================================================
 # HALAMAN PREDIKSI
