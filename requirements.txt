@@ -1,4 +1,4 @@
-streamlit==1.32.0
+streamlit
 pandas
 matplotlib
 seaborn
@@ -6,4 +6,3 @@ gdown
 joblib
 scikit-learn
 numpy
-tensorflow-cpu==2.15.0
