@@ -35,7 +35,8 @@ menu = st.sidebar.radio('Pilih Halaman:', [
     '🏠 Beranda',
     '📊 Distribusi Data',
     '🔍 Analisis Korelasi',
-    '💡 Insight'
+    '💡 Insight',
+    '🔮 Prediksi'
 ])
 
 # ============================================================
@@ -113,3 +114,74 @@ elif menu == '💡 Insight':
     st.info('**Stress Level & Kualitas Tidur**\n\nSemakin tinggi tingkat stres, semakin rendah kualitas tidur.')
     st.info('**Durasi Tidur & Kualitas Tidur**\n\nDurasi tidur 7-8 jam berkorelasi dengan kualitas tidur terbaik.')
     st.info('**Gangguan Tidur**\n\nPenderita Insomnia memiliki tingkat aktivitas fisik paling rendah.')
+
+# ============================================================
+# HALAMAN PREDIKSI
+# ============================================================
+elif menu == '🔮 Prediksi':
+    st.title('🔮 Prediksi Gangguan Tidur')
+    st.write('Masukkan data gaya hidup kamu untuk mengetahui risiko gangguan tidur')
+
+    import tensorflow as tf
+    import joblib
+    import numpy as np
+
+    # Load model dan encoders
+    @st.cache_resource
+    def load_model_assets():
+        # Load encoders
+        enc_id = '1xFfXCESNzS5P_rDrvVORyGqhJrrtsMtP'
+        scaler_id = '1y2XiRYGQzOi5Rkqiq0IeOrjFEslMjR5M'
+        
+        import gdown
+        gdown.download(f'https://drive.google.com/uc?id={enc_id}', 'encoders.pkl', quiet=True)
+        gdown.download(f'https://drive.google.com/uc?id={scaler_id}', 'scaler.pkl', quiet=True)
+        
+        encoders = joblib.load('encoders.pkl')
+        scaler = joblib.load('scaler.pkl')
+        return encoders, scaler
+
+    encoders, scaler = load_model_assets()
+
+    # Form input
+    col1, col2 = st.columns(2)
+
+    with col1:
+        gender = st.selectbox('Jenis Kelamin', ['Male', 'Female'])
+        age = st.slider('Usia', 18, 80, 30)
+        occupation = st.selectbox('Pekerjaan', [
+            'Software Engineer', 'Doctor', 'Sales Representative',
+            'Teacher', 'Nurse', 'Engineer', 'Accountant',
+            'Scientist', 'Lawyer', 'Manager', 'Salesperson'])
+        sleep_duration = st.slider('Durasi Tidur (jam)', 4.0, 10.0, 7.0, 0.1)
+        quality_of_sleep = st.slider('Kualitas Tidur (1-10)', 1, 10, 7)
+        bmi = st.selectbox('Kategori BMI', ['Normal', 'Overweight', 'Obese'])
+
+    with col2:
+        physical_activity = st.slider('Aktivitas Fisik (menit/hari)', 0, 120, 60)
+        stress_level = st.slider('Tingkat Stres (1-10)', 1, 10, 5)
+        heart_rate = st.slider('Detak Jantung (bpm)', 50, 120, 70)
+        daily_steps = st.slider('Langkah Harian', 1000, 20000, 7000)
+        blood_pressure = st.text_input('Tekanan Darah (contoh: 120/80)', '120/80')
+
+    if st.button('🔍 Prediksi Sekarang'):
+        try:
+            # Preprocessing input
+            systolic, diastolic = map(int, blood_pressure.split('/'))
+            
+            input_data = {
+                'Gender': gender, 'Age': age, 'Occupation': occupation,
+                'Sleep Duration': sleep_duration, 'Quality of Sleep': quality_of_sleep,
+                'Physical Activity Level': physical_activity, 'Stress Level': stress_level,
+                'BMI Category': bmi, 'Heart Rate': heart_rate,
+                'Daily Steps': daily_steps, 'Systolic': systolic, 'Diastolic': diastolic
+            }
+
+            input_df = pd.DataFrame([input_data])
+            input_scaled = scaler.transform(input_df)
+
+            st.success('✅ Prediksi berhasil!')
+            st.write(input_df)
+
+        except Exception as e:
+            st.error(f'Error: {e}')
