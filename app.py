@@ -128,6 +128,10 @@ elif menu == '📈 A/B Testing':
 
     np.random.seed(42)
     df_ab = df[['Quality of Sleep', 'Stress Level']].copy()
+    
+    # Tambahkan baris ini untuk fix error
+    df_ab['Quality of Sleep'] = df_ab['Quality of Sleep'].astype(float)
+    
     df_ab['Grup'] = np.random.choice(['A (Kontrol)', 'B (Treatment)'], size=len(df_ab), p=[0.5, 0.5])
     df_ab.loc[df_ab['Grup'] == 'B (Treatment)', 'Quality of Sleep'] += 0.7
     df_ab['Quality of Sleep'] = df_ab['Quality of Sleep'].clip(4, 9)
@@ -153,12 +157,11 @@ elif menu == '📈 A/B Testing':
     st.dataframe(pd.DataFrame(hasil))
 
     if p_value < 0.05:
-        st.success('✅ Program relaksasi terbukti secara statistik meningkatkan kualitas tidur pengguna!')
+        st.success('✅ Program relaksasi terbukti secara statistik meningkatkan kualitas tidur!')
     else:
         st.warning('❌ Tidak ada perbedaan signifikan antara kedua grup')
 
     st.info('ℹ️ Untuk implementasi nyata diperlukan minimal 350 pengguna (175 per grup)')
-
 # ============================================================
 # HALAMAN PREDIKSI
 # ============================================================
